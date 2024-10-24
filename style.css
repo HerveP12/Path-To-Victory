@@ -1,114 +1,203 @@
+/* General Styling */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #282c34;
+  font-family: "Poppins", sans-serif;
+  background-color: #0d1f2d;
+  margin: 0;
+  padding: 20px;
   color: white;
   text-align: center;
-  margin: 0;
 }
 
-#game-container {
-  max-width: 900px;
-  margin: 50px auto;
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #162534;
   padding: 20px;
-  background-color: #333;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 h1 {
   font-size: 3rem;
-  color: #ffcc00;
+  color: #e2b714;
+  margin-bottom: 20px;
 }
 
-#betting-section,
-#dice-section,
-#path-section,
-#result-section {
-  margin: 20px 0;
+h3 {
+  color: #ffc107;
+  margin-bottom: 15px;
+}
+
+.balance-container,
+.bet-container,
+.dice-container,
+.game-result-container,
+.dice-result-container {
+  margin-bottom: 20px;
+}
+
+input[type="number"] {
+  width: 100px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #343a40;
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 2px solid #343a40;
+  margin-right: 10px;
+  font-size: 1rem;
 }
 
 button {
-  padding: 10px 20px;
+  padding: 8px 20px;
+  background-color: #28a745;
+  color: white;
   border: none;
-  border-radius: 8px;
-  background-color: #ffcc00;
-  color: black;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 1rem;
-  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
 button:hover {
-  background-color: #ffcc33;
+  background-color: #218838;
+  transform: scale(1.05);
 }
 
-input,
-select {
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 2px solid #ffcc00;
+.btn-roll {
+  margin-top: 10px;
+  font-size: 1.4rem;
+  padding: 12px 30px;
+  background-color: #ffc107;
+  color: #0d1f2d;
+  font-weight: bold;
 }
 
-#path {
+.btn-roll:hover {
+  background-color: #e2b714;
+  transform: scale(1.08);
+}
+
+/* Path Spaces */
+.path-container {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .path-space {
   width: 60px;
   height: 60px;
-  background-color: #444;
-  color: white;
-  font-size: 1.2rem;
-  border: 2px solid #ffcc00;
-  margin: 5px;
+  border: 3px solid #ffc107;
+  background-color: #0d1f2d;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin: 5px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #ffffff;
+  transition: transform 0.2s, background-color 0.3s;
 }
 
 .path-space.active {
-  background-color: #ffcc00;
-  color: black;
+  background-color: #28a745;
+  color: #fff;
+  box-shadow: 0 0 15px 3px rgba(40, 167, 69, 0.7);
   transform: scale(1.1);
 }
 
-#dice-container {
+.path-space:hover {
+  transform: scale(1.05);
+}
+
+/* Dice Styling */
+.dice-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 20px;
 }
 
 .dice {
-  font-size: 3rem;
-  padding: 20px;
-  transition: transform 0.5s ease-in-out;
-  display: inline-block;
-}
-
-@keyframes dice-roll {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(180deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  font-size: 3.5rem;
+  background-color: #343a40;
+  color: white;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
 }
 
 .dice-roll {
-  animation: dice-roll 0.5s infinite;
+  animation: rollDice 0.7s ease-in-out infinite;
 }
 
-#game-result,
-#dice-result {
-  font-size: 1.5rem;
-  color: #ffcc00;
+@keyframes rollDice {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* Result Containers */
+.game-result-container,
+.dice-result-container,
+.active-bets-container {
+  padding: 15px;
+  border: 1px solid #e2b714;
+  background-color: #0d1f2d;
+  color: white;
+  border-radius: 5px;
+  margin-top: 15px;
+  display: inline-block;
+  font-size: 1.2rem;
+}
+
+.game-result-container {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.dice-result-container {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #ffc107;
+}
+
+/* Active Bets Display */
+.active-bets-container {
+  background-color: #007bff;
+  color: white;
+  font-size: 1.1rem;
+}
+
+/* General Animations */
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 5px #ff6b6b;
+  }
+  50% {
+    box-shadow: 0 0 15px #ff6b6b;
+  }
+  100% {
+    box-shadow: 0 0 5px #ff6b6b;
+  }
 }
