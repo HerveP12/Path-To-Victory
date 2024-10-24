@@ -1,0 +1,114 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #282c34;
+  color: white;
+  text-align: center;
+  margin: 0;
+}
+
+#game-container {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #333;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+h1 {
+  font-size: 3rem;
+  color: #ffcc00;
+}
+
+#betting-section,
+#dice-section,
+#path-section,
+#result-section {
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffcc00;
+  color: black;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #ffcc33;
+}
+
+input,
+select {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 2px solid #ffcc00;
+}
+
+#path {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.path-space {
+  width: 60px;
+  height: 60px;
+  background-color: #444;
+  color: white;
+  font-size: 1.2rem;
+  border: 2px solid #ffcc00;
+  margin: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.path-space.active {
+  background-color: #ffcc00;
+  color: black;
+  transform: scale(1.1);
+}
+
+#dice-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.dice {
+  font-size: 3rem;
+  padding: 20px;
+  transition: transform 0.5s ease-in-out;
+  display: inline-block;
+}
+
+@keyframes dice-roll {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.dice-roll {
+  animation: dice-roll 0.5s infinite;
+}
+
+#game-result,
+#dice-result {
+  font-size: 1.5rem;
+  color: #ffcc00;
+}
