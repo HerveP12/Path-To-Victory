@@ -14,8 +14,7 @@ const diceFaces = ["🎲", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]; // Dice fa
 
 // Update player's balance display
 function updateBalanceDisplay() {
-  document.getElementById("player-balance").innerText =
-    playerBalance.toLocaleString();
+  document.getElementById("player-balance").innerText = playerBalance.toLocaleString();
 }
 
 // Update active bet spots display
@@ -194,13 +193,17 @@ function handleDoubles(diceValue) {
   }
 
   // Check and pay out for Bust Bet
-  if (bustBet > 0 && markerPosition > 0) {
-    const payout = bustBet * 1; // Winnings equal to original bet
-    playerBalance += payout + bustBet; // Add original bet + winnings
-    totalWinnings += payout; // Track winnings for this round
-    resultMessage += ` You won $${payout} on Bust Bet.`;
-  } else if (bustBet > 0 && markerPosition === 0) {
-    resultMessage += ` Bust Bet pushes as it was the first roll.`;
+  if (bustBet > 0) {
+    if (markerPosition === 0) {
+      // First roll with doubles, Bust Bet pushes
+      resultMessage += ` Bust Bet pushes as it was the first roll.`;
+    } else {
+      // Doubles rolled with marker not at start, Bust Bet wins
+      const payout = bustBet * 1; // Winnings equal to original bet
+      playerBalance += payout + bustBet; // Add original bet + winnings
+      totalWinnings += payout; // Track winnings for this round
+      resultMessage += ` You won $${payout} on Bust Bet.`;
+    }
   }
 
   // Check for Roll Bet on doubles (if the player bet on doubles specifically)
@@ -307,6 +310,11 @@ function resolveRollBet(spaces) {
 
 // End game if marker reaches Path 10-14
 function endGame() {
+  // Check if marker position >= 10, causing Bust Bet to lose
+  if (bustBet > 0 && markerPosition >= 10) {
+    document.getElementById("game-result").innerText += ` Bust Bet loses as 10+ points were scored.`;
+  }
+
   resolvePathBet();
   checkEndOfRound();
 }
@@ -400,4 +408,3 @@ function resetBets() {
   document.getElementById("doubles-choice").value = "";
   document.getElementById("roll-choice").value = "";
 }
-
