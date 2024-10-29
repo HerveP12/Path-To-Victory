@@ -5,10 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Path to Victory</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
   </head>
   <body>
     <div class="game-container">
       <h1>Path to Victory</h1>
+
+      <!-- Toggle Rules Button -->
+      <button onclick="toggleRules()" class="btn-toggle-rules">
+        Show Rules & Payouts
+      </button>
+
+      <!-- Rules & Payouts Section (Hidden by Default) -->
+      <div
+        id="rules"
+        class="rules-container"
+        style="display: none; text-align: left"
+      >
+        <h2>Game Rules</h2>
+        <p>
+          In each game, a player rolls two dice until either doubles are rolled
+          or the marker reaches at least 10 points.
+        </p>
+        <p>
+          The game begins with a marker at the start of the Path to Victory.
+        </p>
+        <p>
+          On each roll, the marker advances by the difference between the two
+          dice.
+        </p>
+        <p>
+          Players place bets predicting if the marker will reach 10 points and
+          where it will end. Bets can also be placed on the outcome of the next
+          roll.
+        </p>
+
+        <h2>Bets</h2>
+        <h3>Path Bet</h3>
+        <p>Wins if the marker reaches or exceeds 10 points. Pays:</p>
+        <ul style="list-style-type: none; padding-left: 20px">
+          <li>• 4-1 if marker reaches 14 points</li>
+          <li>• 3-1 if marker reaches 13 points</li>
+          <li>• 1-1 for 10-12 points</li>
+        </ul>
+        <p>Loses if doubles are rolled before reaching 10 points.</p>
+
+        <h3>Bust Bet</h3>
+        <p>• Pushes if doubles are rolled on the first roll</p>
+        <p>• Wins 1-1 if doubles are rolled on any other roll</p>
+        <p>• Loses if the marker reaches at least 10 points</p>
+
+        <h3>Doubles Bet</h3>
+        <p>(Options: 1-1, 2-2, etc.)</p>
+        <p>
+          Wins if the chosen double is rolled, loses if any other double is
+          rolled or if the marker reaches 10 points. Pays 9-1.
+        </p>
+
+        <h3>Finish Bet</h3>
+        <p>(Spaces 1-14)</p>
+        <p>
+          Wins if the marker ends the game on the chosen space, loses if it ends
+          on any other space. Payouts vary based on space.
+        </p>
+
+        <h3>Roll Bet</h3>
+        <p>(Options: Doubles or 0-5 Spaces)</p>
+        <p>
+          Wins if the next roll is doubles or the marker moves the chosen number
+          of spaces. Payouts vary by choice.
+        </p>
+
+        <h2>Payouts</h2>
+        <h3>Path Bet Payouts</h3>
+        <p>
+          10-12 points: 1-1<br />
+          13 points: 3-1<br />
+          14 points: 4-1
+        </p>
+
+        <h3>Bust Bet</h3>
+        <p>All bust bets pay 1-1</p>
+
+        <h3>Doubles Bet Payouts</h3>
+        <p>All doubles bets pay 9-1</p>
+
+        <h3>Finish Bet Payouts</h3>
+        <p>
+          Space 1: 20-1<br />
+          Space 2: 18-1<br />
+          Space 3: 17-1<br />
+          Space 4: 17-1<br />
+          Space 5: 18-1<br />
+          Space 6: 22-1<br />
+          Space 7: 22-1<br />
+          Space 8: 25-1<br />
+          Space 9: 25-1<br />
+          Space 10: 4-1<br />
+          Space 11: 7-1<br />
+          Space 12: 12-1<br />
+          Space 13: 25-1<br />
+          Space 14: 80-1
+        </p>
+
+        <h3>Roll Bet Payouts</h3>
+        <p>
+          Doubles: 4-1<br />
+          1 Space: 2-1<br />
+          2 Spaces: 3-1<br />
+          3 Spaces: 4-1<br />
+          4 Spaces: 7-1<br />
+          5 Spaces: 15-1
+        </p>
+      </div>
 
       <!-- Player Balance Display -->
       <div class="balance-container">
