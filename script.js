@@ -14,7 +14,8 @@ const diceFaces = ["🎲", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]; // Dice fa
 
 // Update player's balance display
 function updateBalanceDisplay() {
-  document.getElementById("player-balance").innerText = playerBalance.toLocaleString();
+  document.getElementById("player-balance").innerText =
+    playerBalance.toLocaleString();
 }
 
 // Update active bet spots display
@@ -59,7 +60,6 @@ function placePathBet() {
     playerBalance -= amount;
     updateBalanceDisplay();
     updateActiveBetsDisplay();
-    alert(`Path Bet placed for $${amount}`);
   } else {
     alert("Invalid bet amount. Make sure it's within your balance.");
   }
@@ -73,60 +73,62 @@ function placeBustBet() {
     playerBalance -= amount;
     updateBalanceDisplay();
     updateActiveBetsDisplay();
-    alert(`Bust Bet placed for $${amount}`);
   } else {
     alert("Invalid bet amount. Make sure it's within your balance.");
   }
 }
 
-// Place Doubles Bet
+// Place Doubles Bet with Dropdown Validation
 function placeDoublesBet() {
   const amount = parseInt(document.getElementById("doubles-bet-amount").value);
   const chosenDouble = document.getElementById("doubles-choice").value;
-  if (amount > 0 && amount <= playerBalance) {
+  if (amount > 0 && amount <= playerBalance && chosenDouble) {
     doublesBet[chosenDouble] = amount;
     playerBalance -= amount;
     updateBalanceDisplay();
     updateActiveBetsDisplay();
-    alert(`Doubles Bet on ${chosenDouble} placed for $${amount}`);
   } else {
-    alert("Invalid bet amount. Make sure it's within your balance.");
+    alert(
+      "Invalid bet amount or choice. Make sure to select a valid option and check your balance."
+    );
   }
 }
 
-// Place Finish Bet
+// Place Finish Bet with Dropdown Validation
 function placeFinishBet() {
   const amount = parseInt(document.getElementById("finish-bet-amount").value);
   const chosenFinish = document.getElementById("finish-choice").value;
-  if (amount > 0 && amount <= playerBalance) {
+  if (amount > 0 && amount <= playerBalance && chosenFinish) {
     finishBet[chosenFinish] = amount;
     playerBalance -= amount;
     updateBalanceDisplay();
     updateActiveBetsDisplay();
-    alert(`Finish Bet on Space ${chosenFinish} placed for $${amount}`);
   } else {
-    alert("Invalid bet amount. Make sure it's within your balance.");
+    alert(
+      "Invalid bet amount or choice. Make sure to select a valid option and check your balance."
+    );
   }
 }
 
-// Place Roll Bet (Exact Spaces or Doubles)
+// Place Roll Bet with Dropdown Validation
 function placeRollBet() {
   const amount = parseInt(document.getElementById("roll-bet-amount").value);
-  const chosenRoll = document.getElementById("roll-choice").value; // Either "doubles" or "exact spaces"
-  if (amount > 0 && amount <= playerBalance) {
+  const chosenRoll = document.getElementById("roll-choice").value;
+  if (amount > 0 && amount <= playerBalance && chosenRoll) {
     rollBet[chosenRoll] = amount;
     playerBalance -= amount;
     updateBalanceDisplay();
     updateActiveBetsDisplay();
-    alert(`Roll Bet on ${chosenRoll} placed for $${amount}`);
   } else {
-    alert("Invalid bet amount. Make sure it's within your balance.");
+    alert(
+      "Invalid bet amount or choice. Make sure to select a valid option and check your balance."
+    );
   }
 }
 
 // Roll Dice with Animation
 function rollDice() {
-  if (!gameActive) return;
+  if (!gameActive) return; // Prevent rolling if the game is inactive
 
   // Ensure at least one bet is placed before rolling the dice
   if (
@@ -178,45 +180,49 @@ function rollDice() {
   }, rollDuration); // Dice rolls for 1 second before showing final result
 }
 
-// Handle Doubles Logic for Roll Bet
+// Handle Doubles Logic for First Roll Conditions
 function handleDoubles(diceValue) {
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
-  // Pay out only if the specific double the player bet on was rolled
-  if (doublesBet[`${diceValue}-${diceValue}`]) {
-    const payout = doublesBet[`${diceValue}-${diceValue}`] * 9; // 9x payout (winnings only)
-    playerBalance += payout + doublesBet[`${diceValue}-${diceValue}`]; // Add original bet + winnings
-    totalWinnings += payout; // Track winnings for this round
-    resultMessage += ` You won $${payout} on Doubles Bet for ${diceValue}-${diceValue}.`;
-  } else if (Object.keys(doublesBet).length > 0) {
-    resultMessage += ` You lost your Doubles Bet.`; // Only show if a Doubles bet was placed
-  }
-
-  // Check and pay out for Bust Bet
-  if (bustBet > 0) {
-    if (markerPosition === 0) {
-      // First roll with doubles, Bust Bet pushes
+  // Check if this is the first roll
+  if (markerPosition === 0) {
+    // Path bet loses on first roll doubles
+    if (pathBet > 0) {
+      resultMessage += ` Path Bet loses as it was the first roll with doubles.`;
+      pathBet = 0; // Path bet reset
+    }
+    // Bust bet pushes on first roll doubles
+    if (bustBet > 0) {
       resultMessage += ` Bust Bet pushes as it was the first roll.`;
-    } else {
-      // Doubles rolled with marker not at start, Bust Bet wins
-      const payout = bustBet * 1; // Winnings equal to original bet
-      playerBalance += payout + bustBet; // Add original bet + winnings
-      totalWinnings += payout; // Track winnings for this round
+    }
+  } else {
+    // Process Bust Bet (if not first roll)
+    if (bustBet > 0) {
+      const payout = bustBet * 1;
+      playerBalance += payout + bustBet;
+      totalWinnings += payout;
       resultMessage += ` You won $${payout} on Bust Bet.`;
     }
   }
 
-  // Check for Roll Bet on doubles (if the player bet on doubles specifically)
-  if (rollBet["doubles"]) {
-    const payout = rollBet["doubles"] * 4; // 4x payout (winnings only)
-    playerBalance += payout + rollBet["doubles"]; // Add original bet + winnings
+  // Process specific doubles bet
+  if (doublesBet[`${diceValue}-${diceValue}`]) {
+    const payout = doublesBet[`${diceValue}-${diceValue}`] * 9;
+    playerBalance += payout + doublesBet[`${diceValue}-${diceValue}`];
     totalWinnings += payout;
-    resultMessage += ` You won $${payout} on Roll Bet for Doubles.`;
-  } else if (rollBet["doubles"]) {
-    resultMessage += ` You lost your Roll Bet for Doubles.`;
+    resultMessage += ` You won $${payout} on Doubles Bet for ${diceValue}-${diceValue}.`;
+  } else if (Object.keys(doublesBet).length > 0) {
+    resultMessage += ` You lost your Doubles Bet.`;
   }
 
-  // Update game results and check for round end
+  // Roll Bet on doubles check
+  if (rollBet["doubles"]) {
+    const payout = rollBet["doubles"] * 4;
+    playerBalance += payout + rollBet["doubles"];
+    totalWinnings += payout;
+    resultMessage += ` You won $${payout} on Roll Bet for Doubles.`;
+  }
+
   document.getElementById("game-result").innerText = resultMessage;
   betsResolved++;
   checkEndOfRound();
@@ -270,16 +276,14 @@ function resolvePathBet() {
 function resolveFinishBet() {
   for (let space in finishBet) {
     if (markerPosition == space) {
-      // Marker must exactly land on the finish bet space
-      const payout = finishBet[space] * getFinishPayout(space); // Winnings based on finish bet multiplier
-      playerBalance += payout + finishBet[space]; // Add original bet + winnings
+      const payout = finishBet[space] * getFinishPayout(space);
+      playerBalance += payout + finishBet[space];
       totalWinnings += payout;
       document.getElementById(
         "game-result"
       ).innerText += ` Finish Bet wins $${payout} on Space ${space}.`;
       betsResolved++;
     } else if (markerPosition > space) {
-      // If marker moves past the finish bet space
       document.getElementById(
         "game-result"
       ).innerText += ` Finish Bet lost on Space ${space}.`;
@@ -292,8 +296,8 @@ function resolveFinishBet() {
 function resolveRollBet(spaces) {
   for (let roll in rollBet) {
     if (roll == spaces) {
-      const payout = rollBet[roll] * getRollPayout(roll); // Winnings based on roll bet multiplier
-      playerBalance += payout + rollBet[roll]; // Add original bet + winnings
+      const payout = rollBet[roll] * getRollPayout(roll);
+      playerBalance += payout + rollBet[roll];
       totalWinnings += payout;
       document.getElementById(
         "game-result"
@@ -310,9 +314,10 @@ function resolveRollBet(spaces) {
 
 // End game if marker reaches Path 10-14
 function endGame() {
-  // Check if marker position >= 10, causing Bust Bet to lose
   if (bustBet > 0 && markerPosition >= 10) {
-    document.getElementById("game-result").innerText += ` Bust Bet loses as 10+ points were scored.`;
+    document.getElementById(
+      "game-result"
+    ).innerText += ` Bust Bet loses as 10+ points were scored.`;
   }
 
   resolvePathBet();
@@ -328,10 +333,14 @@ function checkEndOfRound() {
         Object.keys(finishBet).length +
         (pathBet > 0 ? 1 : 0)
   ) {
+    gameActive = false; // Disable further rolls
+
     setTimeout(function () {
-      alert(`Round Over. Total Winnings: $${totalWinnings}`);
-      resetGame();
-    }, 3000); // Show results for 3 seconds before resetting
+      document.getElementById(
+        "game-result"
+      ).innerText += ` Total Winnings: $${totalWinnings}`;
+      setTimeout(resetGame, 3000); // Automatically reset game after showing total winnings
+    }, 3000);
   }
 }
 
@@ -370,23 +379,23 @@ function getRollPayout(roll) {
 
 // Reset Game after each round
 function resetGame() {
+  // Reset all game state variables
   markerPosition = 0;
-  totalWinnings = 0; // Reset total winnings
-  betsResolved = 0; // Reset bets resolved
-  gameActive = true;
+  totalWinnings = 0;
+  betsResolved = 0;
+  gameActive = true; // Re-enable game activity
 
-  // Reset the display
+  // Reset displayed result and clear path marker
   document.getElementById("dice-result").innerText = "Dice Result: -";
   document.getElementById("game-result").innerText = "Result: -";
 
-  // Clear the active marker
   document.querySelectorAll(".path-space").forEach((space) => {
     space.classList.remove("active");
   });
 
-  // Reset all bets
-  resetBets();
-  updateBalanceDisplay();
+  resetBets(); // Clear all bet amounts
+  updateBalanceDisplay(); // Update the player's balance on screen
+  updateActiveBetsDisplay(); // Reset active bets display
 }
 
 // Reset Bets
@@ -396,7 +405,6 @@ function resetBets() {
   doublesBet = {};
   finishBet = {};
   rollBet = {};
-  updateActiveBetsDisplay();
 
   // Clear the input fields
   document.getElementById("path-bet-amount").value = "";
