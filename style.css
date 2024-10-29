@@ -9,18 +9,19 @@ body {
 }
 
 .game-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   background-color: #162534;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: 3.2rem;
   color: #e2b714;
   margin-bottom: 20px;
+  animation: glowText 1.5s ease-in-out infinite alternate;
 }
 
 h3 {
@@ -28,60 +29,58 @@ h3 {
   margin-bottom: 15px;
 }
 
-.balance-container,
-.bet-container,
-.dice-container,
-.game-result-container,
-.dice-result-container {
-  margin-bottom: 20px;
+/* Keyframes for glowing text effect */
+@keyframes glowText {
+  0% {
+    text-shadow: 0 0 10px #e2b714, 0 0 20px #ffc107;
+  }
+  100% {
+    text-shadow: 0 0 20px #ffc107, 0 0 40px #e2b714;
+  }
 }
 
-input[type="number"] {
-  width: 100px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 2px solid #343a40;
-  margin-right: 10px;
-  font-size: 1rem;
-}
-
+input[type="number"],
 select {
+  width: 120px;
   padding: 8px;
   border-radius: 5px;
   border: 2px solid #343a40;
   margin-right: 10px;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  background-color: #162534;
+  color: #fff;
 }
 
 button {
-  padding: 8px 20px;
+  padding: 10px 20px;
   background-color: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
 button:hover {
   background-color: #218838;
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .btn-roll {
-  margin-top: 10px;
-  font-size: 1.4rem;
-  padding: 12px 30px;
+  margin-top: 20px;
+  font-size: 1.6rem;
+  padding: 15px 40px;
   background-color: #ffc107;
   color: #0d1f2d;
   font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .btn-roll:hover {
   background-color: #e2b714;
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
 /* Path Spaces */
@@ -89,34 +88,45 @@ button:hover {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .path-space {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border: 3px solid #ffc107;
-  background-color: #0d1f2d;
+  background-color: #162534;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 5px;
+  margin: 8px;
   border-radius: 50%;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: #ffffff;
-  transition: transform 0.2s, background-color 0.3s;
+  transition: transform 0.3s, background-color 0.3s;
 }
 
 .path-space.active {
   background-color: #28a745;
   color: #fff;
-  box-shadow: 0 0 15px 3px rgba(40, 167, 69, 0.7);
-  transform: scale(1.1);
+  box-shadow: 0 0 20px 4px rgba(40, 167, 69, 0.7);
+  transform: scale(1.15);
+  animation: glowingPath 1s infinite alternate;
 }
 
 .path-space:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
+}
+
+/* Glowing path animation for active space */
+@keyframes glowingPath {
+  0% {
+    box-shadow: 0 0 10px #28a745;
+  }
+  100% {
+    box-shadow: 0 0 20px #28a745;
+  }
 }
 
 /* Dice Styling */
@@ -128,21 +138,21 @@ button:hover {
 }
 
 .dice {
-  font-size: 3.5rem;
+  font-size: 4rem;
   background-color: #343a40;
   color: white;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
 }
 
 .dice-roll {
-  animation: rollDice 0.7s ease-in-out infinite;
+  animation: rollDice 1s ease-in-out infinite;
 }
 
 @keyframes rollDice {
@@ -150,7 +160,7 @@ button:hover {
     transform: rotate(0deg) scale(1);
   }
   50% {
-    transform: rotate(180deg) scale(1.1);
+    transform: rotate(180deg) scale(1.2);
   }
   100% {
     transform: rotate(360deg) scale(1);
@@ -161,14 +171,14 @@ button:hover {
 .game-result-container,
 .dice-result-container,
 .active-bets-container {
-  padding: 15px;
-  border: 1px solid #e2b714;
+  padding: 20px;
+  border: 2px solid #e2b714;
   background-color: #0d1f2d;
   color: white;
-  border-radius: 5px;
-  margin-top: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
   display: inline-block;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 
 .game-result-container {
@@ -178,7 +188,7 @@ button:hover {
 
 .dice-result-container {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   color: #ffc107;
 }
 
@@ -186,7 +196,7 @@ button:hover {
 .active-bets-container {
   background-color: #007bff;
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
 
 /* General Animations */
