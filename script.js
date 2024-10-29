@@ -52,6 +52,20 @@ window.onload = function () {
   updateActiveBetsDisplay();
 };
 
+// Toggle rules display
+function toggleRules() {
+  const rulesContainer = document.getElementById("rules");
+  const button = document.querySelector(".btn-toggle-rules");
+
+  if (rulesContainer.style.display === "none") {
+    rulesContainer.style.display = "block";
+    button.innerText = "Hide Rules & Payouts";
+  } else {
+    rulesContainer.style.display = "none";
+    button.innerText = "Show Rules & Payouts";
+  }
+}
+
 // Place Path Bet
 function placePathBet() {
   const amount = parseInt(document.getElementById("path-bet-amount").value);
@@ -190,30 +204,22 @@ function resolveBets() {
   checkEndOfRound();
 }
 
-// Handle Doubles Logic for Subsequent Rolls
+// Handle Doubles Logic for Rolls
 function handleDoubles(diceValue) {
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
-  // Process Bust Bet (if not first roll)
-  if (bustBet > 0) {
-    const payout = bustBet * 1;
-    playerBalance += payout + bustBet;
-    totalWinnings += payout;
-    resultMessage += ` You won $${payout} on Bust Bet.`;
-    betsResolved++; // Only count this if there’s an actual result
-  }
-
-  // Process specific doubles bet
+  // Check if the chosen double was rolled
   const chosenDouble = `${diceValue}-${diceValue}`;
   if (doublesBet[chosenDouble]) {
-    // If chosen double rolled, pay 9-1
+    // If the chosen double is rolled, pay out the doubles bet and reset
     const payout = doublesBet[chosenDouble] * 9;
     playerBalance += payout + doublesBet[chosenDouble];
     totalWinnings += payout;
     resultMessage += ` You won $${payout} on Doubles Bet for ${chosenDouble}.`;
-    betsResolved++; // Increment only if payout occurs
+    betsResolved++; // Only count this if payout occurs
+    doublesBet = {}; // Reset doubles bets after win
   } else if (Object.keys(doublesBet).length > 0) {
-    // If any other double was chosen but not rolled, lose the doubles bet
+    // If a different double was rolled, lose the doubles bet
     resultMessage += ` You lost your Doubles Bet.`;
     doublesBet = {}; // Reset doubles bet if lost
     betsResolved++; // Count only when bet is fully resolved
@@ -310,12 +316,21 @@ function resolveRollBet(spaces) {
   }
 }
 
-// End game if marker reaches Path 10-14
+// End game if marker reaches 10 or more points
 function endGame() {
   if (bustBet > 0 && markerPosition >= 10) {
     document.getElementById(
       "game-result"
     ).innerText += ` Bust Bet loses as 10+ points were scored.`;
+  }
+
+  // Resolve and close doubles bets when the game ends at 10 points
+  if (Object.keys(doublesBet).length > 0) {
+    document.getElementById(
+      "game-result"
+    ).innerText += ` Doubles Bet lost as 10 points were reached.`;
+    doublesBet = {}; // Reset doubles bet if lost at 10 points
+    betsResolved++;
   }
 
   resolvePathBet();
