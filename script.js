@@ -208,30 +208,27 @@ function resolveBets() {
 function handleDoubles(diceValue) {
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
-  // Check if the chosen double was rolled
   const chosenDouble = `${diceValue}-${diceValue}`;
   if (doublesBet[chosenDouble]) {
-    // If the chosen double is rolled, pay out the doubles bet and reset
     const payout = doublesBet[chosenDouble] * 9;
-    playerBalance += payout + doublesBet[chosenDouble];
+    playerBalance += payout; // Correct payout calculation
     totalWinnings += payout;
     resultMessage += ` You won $${payout} on Doubles Bet for ${chosenDouble}.`;
-    betsResolved++; // Only count this if payout occurs
     doublesBet = {}; // Reset doubles bets after win
-  } else if (Object.keys(doublesBet).length > 0) {
-    // If a different double was rolled, lose the doubles bet
+    betsResolved++;
+  } else {
     resultMessage += ` You lost your Doubles Bet.`;
     doublesBet = {}; // Reset doubles bet if lost
-    betsResolved++; // Count only when bet is fully resolved
+    betsResolved++;
   }
 
   // Roll Bet on doubles check
   if (rollBet["doubles"]) {
     const payout = rollBet["doubles"] * 4;
-    playerBalance += payout + rollBet["doubles"];
+    playerBalance += payout; // Correct payout calculation
     totalWinnings += payout;
     resultMessage += ` You won $${payout} on Roll Bet for Doubles.`;
-    betsResolved++; // Count if there is a result
+    betsResolved++;
   }
 
   document.getElementById("game-result").innerText = resultMessage;
@@ -263,15 +260,16 @@ function moveMarker(spaces) {
 // Resolve Path Bet
 function resolvePathBet() {
   if (pathBet > 0 && markerPosition >= 10) {
-    let payout = pathBet * 1;
+    let payout = pathBet; // Set to 1:1 payout (original bet amount)
     if (markerPosition === 14) payout = pathBet * 4;
     else if (markerPosition === 13) payout = pathBet * 3;
 
-    playerBalance += payout + pathBet;
+    playerBalance += payout + pathBet; // Return bet amount and winnings
     totalWinnings += payout;
     document.getElementById(
       "game-result"
     ).innerText += ` Path Bet wins $${payout}.`;
+    pathBet = 0; // Reset path bet after resolving
     betsResolved++;
   }
 }
@@ -281,16 +279,18 @@ function resolveFinishBet() {
   for (let space in finishBet) {
     if (markerPosition == space) {
       const payout = finishBet[space] * getFinishPayout(space);
-      playerBalance += payout + finishBet[space];
+      playerBalance += payout; // Correct payout calculation
       totalWinnings += payout;
       document.getElementById(
         "game-result"
       ).innerText += ` Finish Bet wins $${payout} on Space ${space}.`;
+      finishBet = {}; // Reset finish bets after resolving
       betsResolved++;
-    } else if (markerPosition > space) {
+    } else {
       document.getElementById(
         "game-result"
       ).innerText += ` Finish Bet lost on Space ${space}.`;
+      finishBet = {}; // Reset finish bets after loss
       betsResolved++;
     }
   }
@@ -301,16 +301,18 @@ function resolveRollBet(spaces) {
   for (let roll in rollBet) {
     if (roll == spaces) {
       const payout = rollBet[roll] * getRollPayout(roll);
-      playerBalance += payout + rollBet[roll];
+      playerBalance += payout; // Correct payout calculation
       totalWinnings += payout;
       document.getElementById(
         "game-result"
       ).innerText += ` Roll Bet wins $${payout} for ${roll} spaces.`;
+      rollBet = {}; // Reset roll bets after resolving
       betsResolved++;
-    } else if (rollBet[roll] > 0) {
+    } else {
       document.getElementById(
         "game-result"
       ).innerText += ` Roll Bet lost for ${roll} spaces.`;
+      rollBet = {}; // Reset roll bets after loss
       betsResolved++;
     }
   }
