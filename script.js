@@ -142,9 +142,8 @@ function placeRollBet() {
 
 // Roll Dice with Animation
 function rollDice() {
-  if (!gameActive) return; // Prevent rolling if the game is inactive
+  if (!gameActive) return;
 
-  // Ensure at least one bet is placed before rolling the dice
   if (
     pathBet === 0 &&
     bustBet === 0 &&
@@ -156,22 +155,20 @@ function rollDice() {
     return;
   }
 
-  // Show dice rolling animation
   const dice1Elem = document.getElementById("dice-1");
   const dice2Elem = document.getElementById("dice-2");
 
   dice1Elem.classList.add("dice-roll");
   dice2Elem.classList.add("dice-roll");
 
-  // Fake rolling effect: display random dice faces for a while before the final result
-  const rollDuration = 1000; // Time for rolling animation (1 second)
+  const rollDuration = 1000;
   const rollingInterval = setInterval(() => {
     dice1Elem.innerText = diceFaces[Math.floor(Math.random() * 6) + 1];
     dice2Elem.innerText = diceFaces[Math.floor(Math.random() * 6) + 1];
-  }, 100); // Random dice face every 100ms
+  }, 100);
 
   setTimeout(() => {
-    clearInterval(rollingInterval); // Stop the random dice face changes
+    clearInterval(rollingInterval);
 
     const dice1 = Math.floor(Math.random() * 6) + 1;
     const dice2 = Math.floor(Math.random() * 6) + 1;
@@ -179,28 +176,36 @@ function rollDice() {
 
     dice1Elem.innerText = diceFaces[dice1];
     dice2Elem.innerText = diceFaces[dice2];
-
     document.getElementById("dice-result").innerText = `Dice Result: ${result}`;
 
     const difference = Math.abs(dice1 - dice2);
     dice1Elem.classList.remove("dice-roll");
     dice2Elem.classList.remove("dice-roll");
 
-    // Only handle doubles if rolled and if it's not the first roll
-    if (markerPosition > 0 && dice1 === dice2) {
-      handleDoubles(dice1); // Handle doubles with proper logic
+    if (dice1 === dice2) {
+      handleDoubles(dice1);
+      resolveBustBet(true); // Check bust bet for doubles
+      resolveRollBet(difference); // Resolve roll bet specifically for doubles
+      if (markerPosition === 0) {
+        endGame(); // End the game if marker is at space 0 due to doubles
+      }
     } else {
-      moveMarker(difference); // Move the marker based on the difference between dice
-      resolveBets(); // Resolve non-doubles bets
+      moveMarker(difference);
+      resolveBets();
+      if (markerPosition >= 10) {
+        endGame(); // Only end game when marker reaches or exceeds 10
+      }
     }
-  }, rollDuration); // Dice rolls for 1 second before showing final result
+
+    isFirstRoll = false;
+  }, rollDuration);
 }
 
 // Resolve non-doubles bets if no double was rolled
 function resolveBets() {
   resolvePathBet();
-  resolveFinishBet();
   resolveRollBet();
+  resolveBustBet();
   checkEndOfRound();
 }
 
@@ -208,17 +213,36 @@ function resolveBets() {
 function handleDoubles(diceValue) {
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
+  // Check if a finish bet is active and resolve it based on the marker position
+  const targetFinishSpace =
+    Object.keys(finishBet).length > 0
+      ? parseInt(Object.keys(finishBet)[0], 10)
+      : null;
+
+  if (targetFinishSpace !== null) {
+    if (markerPosition === targetFinishSpace) {
+      resolveFinishBet(true); // Win if on the exact chosen finish space
+      endGame();
+      return;
+    } else {
+      resolveFinishBet(false); // Lose if not on the chosen space
+      endGame();
+      return;
+    }
+  }
+
+  // Check if a doubles bet was placed
   const chosenDouble = `${diceValue}-${diceValue}`;
   if (doublesBet[chosenDouble]) {
     const payout = doublesBet[chosenDouble] * 9;
-    playerBalance += payout; // Correct payout calculation
+    playerBalance += payout + doublesBet[chosenDouble];
     totalWinnings += payout;
     resultMessage += ` You won $${payout} on Doubles Bet for ${chosenDouble}.`;
     doublesBet = {}; // Reset doubles bets after win
     betsResolved++;
-  } else {
+  } else if (Object.keys(doublesBet).length > 0) {
     resultMessage += ` You lost your Doubles Bet.`;
-    doublesBet = {}; // Reset doubles bet if lost
+    doublesBet = {};
     betsResolved++;
   }
 
@@ -235,7 +259,7 @@ function handleDoubles(diceValue) {
   checkEndOfRound();
 }
 
-// Move Marker based on dice roll
+// Move Marker based on dice roll and check for finish bet win/loss
 function moveMarker(spaces) {
   markerPosition += spaces;
   if (markerPosition > 14) markerPosition = 14;
@@ -247,13 +271,50 @@ function moveMarker(spaces) {
   const currentSpace = document.getElementById(`space-${markerPosition}`);
   currentSpace.classList.add("active");
 
+  // Check if finish bet should resolve based on marker position
+  const targetFinishSpace =
+    Object.keys(finishBet).length > 0
+      ? parseInt(Object.keys(finishBet)[0], 10)
+      : null;
+
+  if (targetFinishSpace !== null) {
+    if (markerPosition === targetFinishSpace) {
+      resolveFinishBet(true); // Win on exact match
+      endGame();
+      return;
+    } else if (markerPosition > targetFinishSpace) {
+      resolveFinishBet(false); // Lose if passed the chosen space
+      endGame();
+      return;
+    }
+  }
+
   if (markerPosition >= 10) {
     endGame();
   } else {
-    resolveFinishBet();
     resolvePathBet();
     resolveRollBet(spaces);
     checkEndOfRound();
+  }
+}
+
+// Resolve Finish Bet
+function resolveFinishBet(isWin) {
+  for (let space in finishBet) {
+    const payout = finishBet[space] * getFinishPayout(space);
+    if (isWin) {
+      playerBalance += payout + finishBet[space];
+      totalWinnings += payout;
+      document.getElementById(
+        "game-result"
+      ).innerText += ` Finish Bet wins $${payout} on Space ${space}.`;
+    } else {
+      document.getElementById(
+        "game-result"
+      ).innerText += ` Finish Bet lost. The marker exceeded Space ${space}.`;
+    }
+    delete finishBet[space];
+    betsResolved++;
   }
 }
 
@@ -274,72 +335,72 @@ function resolvePathBet() {
   }
 }
 
-// Resolve Finish Bet
-function resolveFinishBet() {
-  for (let space in finishBet) {
-    if (markerPosition == space) {
-      const payout = finishBet[space] * getFinishPayout(space);
-      playerBalance += payout; // Correct payout calculation
-      totalWinnings += payout;
-      document.getElementById(
-        "game-result"
-      ).innerText += ` Finish Bet wins $${payout} on Space ${space}.`;
-      finishBet = {}; // Reset finish bets after resolving
-      betsResolved++;
-    } else {
-      document.getElementById(
-        "game-result"
-      ).innerText += ` Finish Bet lost on Space ${space}.`;
-      finishBet = {}; // Reset finish bets after loss
-      betsResolved++;
-    }
-  }
-}
-
 // Resolve Roll Bet (Exact Spaces)
 function resolveRollBet(spaces) {
   for (let roll in rollBet) {
     if (roll == spaces) {
       const payout = rollBet[roll] * getRollPayout(roll);
-      playerBalance += payout; // Correct payout calculation
+      playerBalance += payout + rollBet[roll];
       totalWinnings += payout;
       document.getElementById(
         "game-result"
       ).innerText += ` Roll Bet wins $${payout} for ${roll} spaces.`;
-      rollBet = {}; // Reset roll bets after resolving
-      betsResolved++;
     } else {
       document.getElementById(
         "game-result"
       ).innerText += ` Roll Bet lost for ${roll} spaces.`;
-      rollBet = {}; // Reset roll bets after loss
-      betsResolved++;
     }
-  }
-}
-
-// End game if marker reaches 10 or more points
-function endGame() {
-  if (bustBet > 0 && markerPosition >= 10) {
-    document.getElementById(
-      "game-result"
-    ).innerText += ` Bust Bet loses as 10+ points were scored.`;
-  }
-
-  // Resolve and close doubles bets when the game ends at 10 points
-  if (Object.keys(doublesBet).length > 0) {
-    document.getElementById(
-      "game-result"
-    ).innerText += ` Doubles Bet lost as 10 points were reached.`;
-    doublesBet = {}; // Reset doubles bet if lost at 10 points
+    delete rollBet[roll]; // Reset roll bet after resolving
     betsResolved++;
   }
-
-  resolvePathBet();
   checkEndOfRound();
 }
 
-// Check if all bets are resolved before resetting the game
+// Resolve Bust Bet with specific conditions
+function resolveBustBet(doublesRolled) {
+  if (bustBet > 0) {
+    if (markerPosition >= 10) {
+      document.getElementById(
+        "game-result"
+      ).innerText += ` Bust Bet loses as 10+ points were scored.`;
+      bustBet = 0;
+      betsResolved++;
+    } else if (doublesRolled) {
+      if (isFirstRoll) {
+        document.getElementById(
+          "game-result"
+        ).innerText += ` Bust Bet pushes on first roll doubles.`;
+      } else {
+        const payout = bustBet;
+        playerBalance += payout + bustBet;
+        totalWinnings += payout;
+        document.getElementById(
+          "game-result"
+        ).innerText += ` Bust Bet wins $${payout}.`;
+        bustBet = 0;
+        betsResolved++;
+      }
+    }
+  }
+  checkEndOfRound();
+}
+
+// End game if marker reaches or exceeds the chosen finish space or 10
+function endGame() {
+  const targetSpace =
+    Object.keys(finishBet).length > 0
+      ? parseInt(Object.keys(finishBet)[0], 10)
+      : 10;
+
+  if (markerPosition >= targetSpace) {
+    resolveFinishBet(); // Only evaluate finish bet at the end of the game
+    resolvePathBet();
+    resolveBustBet(false);
+    checkEndOfRound();
+  }
+}
+
+// Updated checkEndOfRound to handle round resets
 function checkEndOfRound() {
   const activeBets =
     (pathBet > 0 ? 1 : 0) +
@@ -350,7 +411,6 @@ function checkEndOfRound() {
 
   if (betsResolved >= activeBets) {
     gameActive = false;
-
     setTimeout(function () {
       document.getElementById(
         "game-result"
@@ -429,3 +489,4 @@ function resetBets() {
   document.getElementById("doubles-choice").value = "";
   document.getElementById("roll-choice").value = "";
 }
+
