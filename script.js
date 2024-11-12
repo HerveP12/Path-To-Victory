@@ -213,6 +213,10 @@ function resolveBets() {
 function handleDoubles(diceValue) {
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
+  // Disable further actions until the game resets
+  gameActive = false;
+  disableButtons();
+
   // Check if a finish bet is active and resolve it based on the marker position
   const targetFinishSpace =
     Object.keys(finishBet).length > 0
@@ -222,12 +226,10 @@ function handleDoubles(diceValue) {
   if (targetFinishSpace !== null) {
     if (markerPosition === targetFinishSpace) {
       resolveFinishBet(true); // Win if on the exact chosen finish space
-      endGame();
-      return;
+      resultMessage += ` Finish Bet wins on Space ${targetFinishSpace}.`;
     } else {
       resolveFinishBet(false); // Lose if not on the chosen space
-      endGame();
-      return;
+      resultMessage += ` Finish Bet lost. The marker exceeded Space ${targetFinishSpace}.`;
     }
   }
 
@@ -254,9 +256,53 @@ function handleDoubles(diceValue) {
     resultMessage += ` You won $${payout} on Roll Bet for Doubles.`;
     betsResolved++;
   }
+  // Disable all buttons to prevent further actions
+  function disableButtons() {
+    document.querySelectorAll("button").forEach((button) => {
+      button.disabled = true;
+    });
+  }
 
+  // Enable all buttons after the game resets
+  function enableButtons() {
+    document.querySelectorAll("button").forEach((button) => {
+      button.disabled = false;
+    });
+  }
+
+  // Reset Game after each round
+  function resetGame() {
+    markerPosition = 0;
+    totalWinnings = 0;
+    betsResolved = 0;
+    gameActive = true;
+
+    document.getElementById("dice-result").innerText = "Dice Result: -";
+    document.getElementById("game-result").innerText = "Result: -";
+
+    document.querySelectorAll(".path-space").forEach((space) => {
+      space.classList.remove("active");
+    });
+
+    resetBets();
+    updateBalanceDisplay();
+    updateActiveBetsDisplay();
+    enableButtons(); // Re-enable buttons after resetting the game
+  }
+  // Display the complete result message, including doubles rolled and payout details
   document.getElementById("game-result").innerText = resultMessage;
-  checkEndOfRound();
+
+  // Highlight the marker's position
+  document.querySelectorAll(".path-space").forEach((space) => {
+    space.classList.remove("active");
+  });
+  const currentSpace = document.getElementById(`space-${markerPosition}`);
+  if (currentSpace) {
+    currentSpace.classList.add("active");
+  }
+
+  // Add a delay before resetting the game to display results
+  setTimeout(resetGame, 2000); // Delay of 3 seconds before resetting the game
 }
 
 // Move Marker based on dice roll and check for finish bet win/loss
@@ -489,4 +535,3 @@ function resetBets() {
   document.getElementById("doubles-choice").value = "";
   document.getElementById("roll-choice").value = "";
 }
-
