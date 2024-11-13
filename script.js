@@ -211,6 +211,7 @@ function resolveBets() {
 
 // Handle Doubles Logic for Rolls
 function handleDoubles(diceValue) {
+  // Initial message about doubles being rolled
   let resultMessage = `Doubles rolled! Marker ends at space ${markerPosition}.`;
 
   // Disable further actions until the game resets
@@ -302,9 +303,8 @@ function handleDoubles(diceValue) {
   }
 
   // Add a delay before resetting the game to display results
-  setTimeout(resetGame, 2000); // Delay of 3 seconds before resetting the game
+  setTimeout(resetGame, 3000); // Delay of 3 seconds before resetting the game
 }
-
 // Move Marker based on dice roll and check for finish bet win/loss
 function moveMarker(spaces) {
   markerPosition += spaces;
@@ -315,7 +315,9 @@ function moveMarker(spaces) {
   });
 
   const currentSpace = document.getElementById(`space-${markerPosition}`);
-  currentSpace.classList.add("active");
+  if (currentSpace) {
+    currentSpace.classList.add("active");
+  }
 
   // Check if finish bet should resolve based on marker position
   const targetFinishSpace =
@@ -334,9 +336,17 @@ function moveMarker(spaces) {
       return;
     }
   }
-
+  // If the marker reaches spaces 10-14 and there are only doubles bets active
   if (markerPosition >= 10) {
-    endGame();
+    if (Object.keys(doublesBet).length > 0) {
+      // The player loses the doubles bet if they haven't rolled the specific double
+      document.getElementById(
+        "game-result"
+      ).innerText += ` You lost your Doubles Bet.`;
+      doublesBet = {}; // Reset doubles bets
+      betsResolved++;
+    }
+    endGame(); // End the game since we've reached 10+ without winning the doubles bet
   } else {
     resolvePathBet();
     resolveRollBet(spaces);
@@ -428,6 +438,23 @@ function resolveBustBet(doublesRolled) {
       }
     }
   }
+  checkEndOfRound();
+}
+
+// If the marker reaches spaces 10-14, resolve the doubles bet as lost and end the game
+if (markerPosition >= 10) {
+  if (Object.keys(doublesBet).length > 0) {
+    // Resolve doubles bet as lost
+    document.getElementById(
+      "game-result"
+    ).innerText += ` You lost your Doubles Bet.`;
+    doublesBet = {}; // Reset doubles bet
+    betsResolved++;
+  }
+  endGame();
+} else {
+  resolvePathBet();
+  resolveRollBet(spaces);
   checkEndOfRound();
 }
 
