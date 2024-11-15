@@ -208,7 +208,7 @@
         </div>
 
         <!-- Roll Bet -->
-        <div>
+        <div class="roll-bet-section">
           <label for="roll-bet-amount">Roll Bet: </label>
           <input
             type="number"
@@ -224,6 +224,18 @@
             <option value="doubles">Doubles</option>
           </select>
           <button onclick="placeRollBet()">Place Roll Bet</button>
+          <p class="roll-bet-instructions">
+            <strong>Note:</strong> Roll Bets can be placed repeatedly throughout
+            the game.
+          </p>
+          <!-- Roll Bet Active Indicator -->
+          <div id="roll-bet-indicator" class="roll-bet-indicator">
+            Roll Bet: Inactive
+          </div>
+          <!-- Roll Bet List -->
+          <div id="roll-bet-list" class="roll-bet-list">
+            No Active Roll Bets
+          </div>
         </div>
       </div>
 
