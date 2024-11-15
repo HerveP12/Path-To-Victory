@@ -167,6 +167,48 @@ button:hover {
   }
 }
 
+/* Roll Bet Indicator Styling */
+.roll-bet-indicator {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 5px;
+  border-radius: 3px;
+  color: #fff;
+  background-color: #ff4c4c; /* Default to inactive (red) */
+  transition: background-color 0.3s ease;
+  display: inline-block; /* Inline-block for a more compact design */
+}
+
+.roll-bet-indicator.active {
+  background-color: #28a745; /* Active (green) */
+  color: #fff;
+}
+
+/* Roll Bet List Styling */
+.roll-bet-list {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #ffcc00;
+  background-color: #162534;
+  border: 1px solid #ffc107;
+  border-radius: 3px;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Roll Bet Totals Styling */
+.roll-bet-totals {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #ffc107;
+  background-color: #162534;
+  border: 1px solid #ffc107;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: left;
+}
+
 /* Result Containers */
 .game-result-container,
 .dice-result-container,
