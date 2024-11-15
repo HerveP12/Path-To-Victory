@@ -124,19 +124,147 @@ function placeFinishBet() {
   }
 }
 
-// Place Roll Bet with Dropdown Validation
+let totalRollBetWagered = 0; // Track total amount wagered on roll bets
+let totalRollBetWinnings = 0; // Track total amount won from roll bets
+
+// Place Roll Bet with Active Indicator and List
 function placeRollBet() {
   const amount = parseInt(document.getElementById("roll-bet-amount").value);
   const chosenRoll = document.getElementById("roll-choice").value;
+
   if (amount > 0 && amount <= playerBalance && chosenRoll) {
     rollBet[chosenRoll] = amount;
     playerBalance -= amount;
+    totalRollBetWagered += amount; // Add to the total wagered on roll bets
     updateBalanceDisplay();
     updateActiveBetsDisplay();
+    updateRollBetIndicator(); // Update Roll Bet Indicator to show active status
+    updateRollBetList(); // Update the Roll Bet List
+    updateRollBetTotals(); // Update the total wagered display
   } else {
     alert(
       "Invalid bet amount or choice. Make sure to select a valid option and check your balance."
     );
+  }
+}
+
+// Resolve Roll Bet (Exact Spaces or Doubles)
+function resolveRollBet(spaces) {
+  let rollBetResolved = false;
+  let winningMessage = ""; // Store winning message
+  let losingMessage = ""; // Store losing message
+
+  // Check for a winning roll bet
+  for (let roll in rollBet) {
+    // Convert roll to an integer for comparison
+    const rollNumber = parseInt(roll);
+
+    // Check if the player wins by doubles or by the chosen number of spaces
+    if (roll === "doubles" && spaces % 2 === 0 && spaces !== 0) {
+      // Win on doubles
+      const payout = rollBet[roll] * 4; // Example payout for doubles
+      playerBalance += payout + rollBet[roll];
+      totalWinnings += payout;
+      winningMessage += ` Roll Bet wins $${payout} for doubles.`;
+    } else if (rollNumber === spaces) {
+      // Win on the exact number of spaces
+      const payout = rollBet[roll] * getRollPayout(rollNumber);
+      playerBalance += payout + rollBet[roll];
+      totalWinnings += payout;
+      winningMessage += ` Roll Bet wins $${payout} for ${rollNumber} spaces.`;
+    } else {
+      // Only display a losing message for the player's actual chosen bet
+      losingMessage = ` Roll Bet lost for ${rollNumber} spaces.`;
+    }
+
+    rollBetResolved = true;
+  }
+
+  // Display only the relevant messages
+  if (winningMessage) {
+    document.getElementById("game-result").innerText += winningMessage;
+  } else if (losingMessage) {
+    // Only display the losing message if there was no win
+    document.getElementById("game-result").innerText += losingMessage;
+  }
+
+  // If roll bets were resolved, reset only the roll bet indicator and list
+  if (rollBetResolved) {
+    resetRollBetMidRound(); // Call the reset function for the roll bet
+  }
+}
+
+// Function to reset only the roll bet indicator and list mid-round
+function resetRollBetMidRound() {
+  // Clear only the roll bet object to remove active roll bets
+  rollBet = {};
+
+  // Update the Roll Bet Indicator to show inactive status
+  const indicator = document.getElementById("roll-bet-indicator");
+  if (indicator) {
+    indicator.textContent = "Roll Bet: Inactive"; // Set text to "Inactive"
+    indicator.classList.remove("active"); // Remove active class
+  }
+
+  // Clear the Roll Bet List display
+  const rollBetList = document.getElementById("roll-bet-list");
+  if (rollBetList) {
+    rollBetList.textContent = "No Active Roll Bets"; // Clear the list content
+  }
+}
+
+// Function to reset only the roll bet indicator and list mid-round
+function resetRollBetMidRound() {
+  // Clear only the roll bet object to remove active roll bets
+  rollBet = {};
+
+  // Update the Roll Bet Indicator to show inactive status
+  const indicator = document.getElementById("roll-bet-indicator");
+  if (indicator) {
+    indicator.textContent = "Roll Bet: Inactive"; // Set text to "Inactive"
+    indicator.classList.remove("active"); // Remove active class
+  }
+
+  // Clear the Roll Bet List display
+  const rollBetList = document.getElementById("roll-bet-list");
+  if (rollBetList) {
+    rollBetList.textContent = "No Active Roll Bets"; // Clear the list content
+  }
+}
+
+// Function to check if there are no other active bets (besides Roll Bet)
+function noOtherBetsActive() {
+  return (
+    pathBet === 0 &&
+    bustBet === 0 &&
+    Object.keys(doublesBet).length === 0 &&
+    Object.keys(finishBet).length === 0
+  );
+}
+
+// Function to update Roll Bet Indicator
+function updateRollBetIndicator() {
+  const indicator = document.getElementById("roll-bet-indicator");
+  if (Object.keys(rollBet).length > 0) {
+    indicator.textContent = "Roll Bet: Active";
+    indicator.classList.add("active");
+  } else {
+    indicator.textContent = "Roll Bet: Inactive";
+    indicator.classList.remove("active");
+  }
+}
+
+// Function to update Roll Bet List
+function updateRollBetList() {
+  const rollBetList = document.getElementById("roll-bet-list");
+  const bets = Object.entries(rollBet);
+  if (bets.length > 0) {
+    rollBetList.innerHTML = "<strong>Active Roll Bets:</strong><br>";
+    bets.forEach(([roll, amount]) => {
+      rollBetList.innerHTML += `• ${roll}: $${amount}<br>`;
+    });
+  } else {
+    rollBetList.textContent = "No Active Roll Bets";
   }
 }
 
@@ -305,11 +433,12 @@ function handleDoubles(diceValue) {
   // Add a delay before resetting the game to display results
   setTimeout(resetGame, 3000); // Delay of 3 seconds before resetting the game
 }
-// Move Marker based on dice roll and check for finish bet win/loss
+// Move Marker based on dice roll
 function moveMarker(spaces) {
   markerPosition += spaces;
   if (markerPosition > 14) markerPosition = 14;
 
+  // Highlight the current space
   document.querySelectorAll(".path-space").forEach((space) => {
     space.classList.remove("active");
   });
@@ -319,24 +448,27 @@ function moveMarker(spaces) {
     currentSpace.classList.add("active");
   }
 
-  // Check if finish bet should resolve based on marker position
+  // Check if the Finish Bet should resolve immediately if it's the only active bet
   const targetFinishSpace =
     Object.keys(finishBet).length > 0
       ? parseInt(Object.keys(finishBet)[0], 10)
       : null;
 
-  if (targetFinishSpace !== null) {
-    if (markerPosition === targetFinishSpace) {
-      resolveFinishBet(true); // Win on exact match
-      endGame();
-      return;
-    } else if (markerPosition > targetFinishSpace) {
-      resolveFinishBet(false); // Lose if passed the chosen space
-      endGame();
-      return;
-    }
+  if (
+    targetFinishSpace !== null &&
+    markerPosition > targetFinishSpace &&
+    pathBet === 0 &&
+    bustBet === 0 &&
+    Object.keys(doublesBet).length === 0 &&
+    Object.keys(rollBet).length === 0
+  ) {
+    // The Finish Bet loses because the marker has gone past the target space
+    resolveFinishBet(false);
+    endGame();
+    return;
   }
-  // If the marker reaches spaces 10-14 and there are only doubles bets active
+
+  // If the marker reaches spaces 10-14, check for doubles bets and end the game
   if (markerPosition >= 10) {
     if (Object.keys(doublesBet).length > 0) {
       // The player loses the doubles bet if they haven't rolled the specific double
@@ -348,8 +480,32 @@ function moveMarker(spaces) {
     }
     endGame(); // End the game since we've reached 10+ without winning the doubles bet
   } else {
+    // If both Roll Bet and Path Bet are active, allow Roll Bet to win or lose
+    if (pathBet > 0 && Object.keys(rollBet).length > 0) {
+      // Check if the Roll Bet wins
+      if (rollBet[spaces]) {
+        const payout = rollBet[spaces] * getRollPayout(spaces);
+        playerBalance += payout + rollBet[spaces];
+        totalWinnings += payout;
+        document.getElementById(
+          "game-result"
+        ).innerText += ` Roll Bet wins $${payout} for ${spaces} spaces.`;
+        delete rollBet[spaces]; // Remove the Roll Bet after winning
+      } else {
+        // Roll Bet loses if the rolled spaces do not match the bet
+        document.getElementById(
+          "game-result"
+        ).innerText += ` Roll Bet lost for ${spaces} spaces.`;
+        rollBet = {}; // Reset Roll Bet after losing
+      }
+      // The game continues; do not end it here
+    } else {
+      // Resolve Roll Bet if no Path Bet is active
+      resolveRollBet(spaces);
+    }
+
+    // Always resolve Path Bet if applicable
     resolvePathBet();
-    resolveRollBet(spaces);
     checkEndOfRound();
   }
 }
@@ -391,8 +547,11 @@ function resolvePathBet() {
   }
 }
 
-// Resolve Roll Bet (Exact Spaces)
-function resolveRollBet(spaces) {
+// Updated Resolve Roll Bet Function
+function resolveRollBet(spaces, checkGameEnd = true) {
+  let rollBetResolved = false;
+
+  // Iterate through all active roll bets and check for a win
   for (let roll in rollBet) {
     if (roll == spaces) {
       const payout = rollBet[roll] * getRollPayout(roll);
@@ -406,10 +565,54 @@ function resolveRollBet(spaces) {
         "game-result"
       ).innerText += ` Roll Bet lost for ${roll} spaces.`;
     }
-    delete rollBet[roll]; // Reset roll bet after resolving
-    betsResolved++;
+    rollBetResolved = true;
   }
-  checkEndOfRound();
+
+  // If roll bets were resolved, forcefully reset the roll bet indicator and list
+  if (rollBetResolved) {
+    resetRollBetMidRound(); // Call the reset function
+  }
+
+  // Check if the game should end if no other bets are active
+  if (checkGameEnd && noOtherBetsActive()) {
+    endGame();
+  }
+}
+
+// Function to update Roll Bet Indicator
+function updateRollBetIndicator() {
+  const indicator = document.getElementById("roll-bet-indicator");
+  if (Object.keys(rollBet).length > 0) {
+    indicator.textContent = "Roll Bet: Active";
+    indicator.classList.add("active");
+  } else {
+    indicator.textContent = "Roll Bet: Inactive";
+    indicator.classList.remove("active");
+  }
+}
+
+// Function to update Roll Bet List
+function updateRollBetList() {
+  const rollBetList = document.getElementById("roll-bet-list");
+  const bets = Object.entries(rollBet);
+  if (bets.length > 0) {
+    rollBetList.innerHTML = "<strong>Active Roll Bets:</strong><br>";
+    bets.forEach(([roll, amount]) => {
+      rollBetList.innerHTML += `• ${roll}: $${amount}<br>`;
+    });
+  } else {
+    rollBetList.textContent = "No Active Roll Bets";
+  }
+}
+
+// Function to check if there are no other active bets
+function noOtherBetsActive() {
+  return (
+    pathBet === 0 &&
+    bustBet === 0 &&
+    Object.keys(doublesBet).length === 0 &&
+    Object.keys(finishBet).length === 0
+  );
 }
 
 // Resolve Bust Bet with specific conditions
@@ -458,19 +661,32 @@ if (markerPosition >= 10) {
   checkEndOfRound();
 }
 
-// End game if marker reaches or exceeds the chosen finish space or 10
 function endGame() {
+  // Resolve Path Bet first
+  resolvePathBet();
+
+  // Resolve Roll Bet if it was deferred
+  if (Object.keys(rollBet).length > 0) {
+    resolveRollBet(markerPosition); // Resolve the Roll Bet at the end of the game
+  }
+
+  // Then, resolve Finish Bet if necessary
   const targetSpace =
     Object.keys(finishBet).length > 0
       ? parseInt(Object.keys(finishBet)[0], 10)
-      : 10;
+      : null;
 
-  if (markerPosition >= targetSpace) {
-    resolveFinishBet(); // Only evaluate finish bet at the end of the game
-    resolvePathBet();
-    resolveBustBet(false);
-    checkEndOfRound();
+  if (targetSpace !== null) {
+    if (markerPosition === targetSpace) {
+      resolveFinishBet(true); // Win if the marker ends at the exact chosen space
+    } else {
+      resolveFinishBet(false); // Lose if the marker goes past the target space
+    }
   }
+
+  // Resolve Bust Bet
+  resolveBustBet(false);
+  checkEndOfRound(); // Check if all bets are resolved and end the game
 }
 
 // Updated checkEndOfRound to handle round resets
@@ -545,7 +761,7 @@ function resetGame() {
   updateActiveBetsDisplay();
 }
 
-// Reset Bets
+// Update the Roll Bet List and Indicator to inactive when the game resets
 function resetBets() {
   pathBet = 0;
   bustBet = 0;
@@ -561,4 +777,7 @@ function resetBets() {
   document.getElementById("finish-choice").value = "";
   document.getElementById("doubles-choice").value = "";
   document.getElementById("roll-choice").value = "";
+
+  updateRollBetIndicator(); // Set Roll Bet Indicator to inactive
+  updateRollBetList(); // Clear the Roll Bet List
 }
